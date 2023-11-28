@@ -25,7 +25,8 @@ Route::prefix('proyectos')->group(function () {
 Route::prefix('tareas')->group(function () {
     Route::controller(TareaController::class)->group(function () {
         Route::get('listar', 'listar');
-        Route::post('crear/{id}', 'crear');
+        Route::post('crear', 'crear');
+        Route::put('actualizar/{id}', 'actualizar');
     });
 });
 

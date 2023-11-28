@@ -12,23 +12,28 @@ class UsuarioController extends Controller
 {
     public function listar()
     {
-        $usuarios = Usuario::all();
+        try {
+            $usuarios = Usuario::all();
 
-        return response()->json(['usuarios' => $usuarios], 200);
+            return response()->json(['usuarios' => $usuarios], 200);
+        } catch (\Exception $th) {
+            return response()->json([
+                'message' => 'Error al obtener la lista de usuarios: ' , $th->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     public function crear(CrearUsuarioRequest $request)
     {
-        $datos = $request->validated();
-
-        Usuario::create([
-            'nombre' => $datos['nombre'],
-            'correo' => $datos['correo'],
-            'contrasena' => bcrypt($datos['contrasena']),
-        ]);
-
-        return response()->json([
-            'message' => 'Se ha registrado correctamente.',
-        ], Response::HTTP_CREATED);
+        try {
+            Usuario::create($request->validated());
+            return response()->json([
+                'message' => 'Se ha registrado correctamente.',
+            ], Response::HTTP_CREATED);
+        } catch (\Exception $th) {
+            return response()->json([
+                'message' => 'Error al registrar el usuario: ' , $th->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
 }
