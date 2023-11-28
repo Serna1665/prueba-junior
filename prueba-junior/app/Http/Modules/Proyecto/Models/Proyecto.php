@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Http\Modules\Proyecto\Models;
+
+use App\Http\Modules\Tareas\Models\Tarea;
+use App\Http\Modules\Usuario\Models\Usuario;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Proyecto extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'nombre',
+        'descripcion',
+        'fecha_inicio',
+        'fecha_finalizacion',
+        'tarea_id'
+    ];
+
+    public function tareas()
+    {
+        return $this->hasMany(Tarea::class);
+    }
+
+    public function usuarios()
+    {
+        return $this->belongsToMany(Usuario::class);
+    }
+
+
+}
