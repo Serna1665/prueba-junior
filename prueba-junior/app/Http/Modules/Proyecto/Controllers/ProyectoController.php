@@ -21,37 +21,47 @@ class ProyectoController extends Controller
 
     public function listar()
     {
-        $proyectos = $this->proyectoRepository->listarConUsuarios();
-        return response()->json($proyectos, Response::HTTP_OK);
+        try {
+            $this->proyectoRepository->listarConUsuarios();
+            return response()->json(Response::HTTP_OK);
+        } catch (\Exception $th) {
+            return response()->json([
+                'mensaje' => 'Error al obtener la lista de proyectos: ', $th->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
 
 
     public function crear(CrearProyectoRequest $request)
     {
-        $nuevoProyecto = new Proyecto([
-            'nombre' => $request->input('nombre'),
-            'descripcion' => $request->input('descripcion'),
-            'fecha_inicio' => $request->input('fecha_inicio'),
-            'fecha_finalizacion' => $request->input('fecha_finalizacion'),
-        ]);
-
-        $nuevoProyecto->save();
-
-        return response()->json([
-            'message' => 'Se ha registrado correctamente.',
-        ], Response::HTTP_CREATED);
+        try {
+            $datos = $request->validated();
+            $nuevoProyecto = new Proyecto($datos);
+            $nuevoProyecto->save();
+            return response()->json([
+                'mensaje' => 'Se ha registrado correctamente.',
+            ], Response::HTTP_CREATED);
+        } catch (\Exception $th) {
+            return response()->json([
+                'mensaje' => 'Error al registrar el proyecto: ', $th->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     public function actualizar(ActualizarProyectoRequest $request, $id)
     {
-        $proyecto = Proyecto::find($id);
-
-        if (!$proyecto) {
-            return response()->json(['message' => 'Proyecto no encontrado'], Response::HTTP_NOT_FOUND);
+        try {
+            $proyecto = Proyecto::find($id);
+            if (!$proyecto) {
+                return response()->json(['mensaje' => 'Proyecto no encontrado'], Response::HTTP_NOT_FOUND);
+            }
+            $datosActualizados = $request->validated();
+            $proyecto->update($datosActualizados);
+            return response()->json(['mensaje' => 'Proyecto actualizado correctamente'], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+                'mensaje' => 'Error al actualizar el proyecto: ' . $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
         }
-
-        $proyecto->update($request->all());
-
-        return response()->json(['message' => 'Proyecto actualizado correctamente'], Response::HTTP_OK);
     }
 }

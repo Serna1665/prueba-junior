@@ -28,33 +28,34 @@ class TareaController extends Controller
 
     public function crear(CrearTareaRequest $request)
     {
-        $datosTarea = $request->only(['nombre', 'descripcion', 'fecha_inicio', 'fecha_finalizacion', 'estado', 'proyecto_id']);
-
-        $nuevaTarea = $this->tareaRepository->crearTarea($datosTarea);
-
-        return response()->json([
-            'message' => 'Error al crear la asiste'
-        ], Response::HTTP_BAD_REQUEST);
+        try {
+            $datosTarea = $request->validated();
+            $this->tareaRepository->crearTarea($datosTarea);
+            return response()->json([
+                'message' => 'Tarea creada correctamente',
+            ], Response::HTTP_CREATED);
+        } catch (\Exception $th) {
+            return response()->json([
+                'message' => 'Error al crear la tarea: ', $th->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
     }
+
 
     public function actualizar(ActualizarTareaRequest $request, $id)
     {
-        $tarea = Tarea::find($id);
+        try {
+            $tarea = Tarea::findOrFail($id);
+            $tarea->fill($request->validated());
+            $tarea->save();
 
-        if (!$tarea) {
             return response()->json([
-                'message' => 'Error al actualizar una tarea'
+                'message' => 'Tarea actualizada correctamente',
+            ], Response::HTTP_OK);
+        } catch (\Exception $th) {
+            return response()->json([
+                'message' => 'Error al actualizar la tarea: ' . $th->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
-
-        $datosActualizados = $request->only(['nombre', 'descripcion', 'fecha_inicio', 'fecha_finalizacion', 'estado']);
-
-        $tarea->fill($datosActualizados);
-        $tarea->save();
-
-        return response()->json([
-            'message' => 'Error al eliminar una tarea'
-        ], Response::HTTP_BAD_REQUEST);
     }
-
 }
